@@ -1,18 +1,6 @@
-// ============================================================
-// app.js — what your site DOES.
-// Plain JavaScript, no libraries, no installs.
-// It uses STARTUP and LISTINGS from data.js (loaded first).
-// ============================================================
-
 (function () {
   "use strict";
 
-  // ----------------------------------------------------------
-  // 1. Saving things in the browser (localStorage).
-  //    This only remembers things on THIS browser on THIS device.
-  //    Your teammates and your customers will NOT see it.
-  //    A real product would need a server and a database for that.
-  // ----------------------------------------------------------
   const storage = {
     get: function (key, fallback) {
       try {
@@ -31,19 +19,31 @@
     }
   };
 
-  let savedIds = storage.get("savedIds", []);
+  function dateOffset(days) {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
+  }
 
-  // ----------------------------------------------------------
-  // 2. Put the startup's name and pitch on the page.
-  // ----------------------------------------------------------
+  const storedPlants = storage.get("sproutPlants", null);
+  let plants = Array.isArray(storedPlants) ? storedPlants : STARTER_PLANTS.map(function (plant) {
+    return {
+      id: plant.id,
+      name: plant.name,
+      interval: plant.interval,
+      lastWatered: dateOffset(-plant.daysSinceWatered)
+    };
+  });
+  let sitterRequests = storage.get("sproutSitterRequests", {});
+
   document.title = STARTUP.name;
   document.getElementById("brand-name").textContent = STARTUP.name;
   document.getElementById("tagline").textContent = STARTUP.tagline;
   document.getElementById("pitch").textContent = STARTUP.pitch;
 
-  // ----------------------------------------------------------
-  // 3. Views: show one section at a time, based on the #link in the address bar.
-  // ----------------------------------------------------------
   function showView() {
     const requested = (window.location.hash || "#home").slice(1);
     const views = document.querySelectorAll("[data-view]");
@@ -69,73 +69,142 @@
 
   window.addEventListener("hashchange", showView);
 
-  // ----------------------------------------------------------
-  // 4. Explore page: build one card per listing.
-  //    We use textContent (not innerHTML) so text is always shown
-  //    as text — a basic security habit.
-  // ----------------------------------------------------------
-  const grid = document.getElementById("listing-grid");
-  const searchBox = document.getElementById("search-box");
-  const emptyMessage = document.getElementById("empty-message");
-  const savedCount = document.getElementById("saved-count");
+  function dayDifference(firstDate, secondDate) {
+    const first = new Date(firstDate + "T00:00:00");
+    const second = new Date(secondDate + "T00:00:00");
+    return Math.round((second.getTime() - first.getTime()) / 86400000);
+  }
 
-  function makeCard(item) {
-    const card = document.createElement("article");
-    card.className = "card";
+  function daysUntilWater(plant) {
+    const dueDate = dateOffset(plant.interval - dayDifference(plant.lastWatered, dateOffset(0)));
+    return dayDifference(dateOffset(0), dueDate);
+  }
 
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = item.category;
+  function createElement(tagName, className, text) {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
 
-    const title = document.createElement("h2");
-    title.textContent = item.name;
+  function savePlants() {
+    storage.set("sproutPlants", plants);
+    renderPlants();
+    renderDashboard();
+  }
 
-    const text = document.createElement("p");
-    text.textContent = item.description;
-
-    const isSaved = savedIds.indexOf(item.id) !== -1;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "button secondary";
-    button.textContent = isSaved ? "Saved ✓" : "Save";
-    button.setAttribute("aria-pressed", isSaved ? "true" : "false");
-    button.addEventListener("click", function () {
-      toggleSaved(item.id);
+  function waterPlant(id) {
+    plants = plants.map(function (plant) {
+      return plant.id === id ? Object.assign({}, plant, { lastWatered: dateOffset(0) }) : plant;
     });
+    savePlants();
+  }
 
-    card.append(tag, title, text, button);
+  function removePlant(id) {
+    plants = plants.filter(function (plant) { return plant.id !== id; });
+    savePlants();
+  }
+
+  function statusFor(plant) {
+    const remaining = daysUntilWater(plant);
+    if (remaining < 0) return { text: "Overdue by " + Math.abs(remaining) + (Math.abs(remaining) === 1 ? " day" : " days"), className: "status overdue" };
+    if (remaining === 0) return { text: "Due today", className: "status due" };
+    return { text: "In " + remaining + (remaining === 1 ? " day" : " days"), className: "status" };
+  }
+
+  function makePlantRow(plant, compact) {
+    const row = createElement(compact ? "li" : "article", compact ? "care-item" : "plant-item");
+    const details = createElement("div", "plant-details");
+    const name = createElement("h3", "", plant.name);
+    const frequency = createElement("p", "plant-frequency", "Every " + plant.interval + " days");
+    const status = statusFor(plant);
+    const badge = createElement("span", status.className, status.text);
+    details.append(name, frequency);
+    row.append(details, badge);
+
+    if (!compact) {
+      const actions = createElement("div", "plant-actions");
+      const waterButton = createElement("button", "button small-button", "Watered");
+      waterButton.type = "button";
+      waterButton.addEventListener("click", function () { waterPlant(plant.id); });
+      const removeButton = createElement("button", "remove-button", "Remove");
+      removeButton.type = "button";
+      removeButton.setAttribute("aria-label", "Remove " + plant.name);
+      removeButton.addEventListener("click", function () { removePlant(plant.id); });
+      actions.append(waterButton, removeButton);
+      row.append(actions);
+    }
+    return row;
+  }
+
+  function renderPlants() {
+    const list = document.getElementById("plant-list");
+    list.replaceChildren.apply(list, plants.map(function (plant) { return makePlantRow(plant, false); }));
+    document.getElementById("plants-empty").hidden = plants.length > 0;
+  }
+
+  function renderDashboard() {
+    const today = dateOffset(0);
+    const duePlants = plants.filter(function (plant) { return daysUntilWater(plant) <= 0; });
+    const list = document.getElementById("today-list");
+    const orderedPlants = plants.slice().sort(function (first, second) {
+      return daysUntilWater(first) - daysUntilWater(second);
+    });
+    list.replaceChildren.apply(list, orderedPlants.map(function (plant) { return makePlantRow(plant, true); }));
+    document.getElementById("plant-count").textContent = String(plants.length);
+    document.getElementById("due-count").textContent = String(duePlants.length);
+    document.getElementById("watered-count").textContent = String(plants.filter(function (plant) { return plant.lastWatered === today; }).length);
+    document.getElementById("today-empty").hidden = plants.length > 0;
+  }
+
+  function makeSitterCard(sitter) {
+    const card = createElement("article", "sitter-card");
+    const avatar = createElement("span", "sitter-avatar", sitter.name.slice(0, 1));
+    avatar.setAttribute("aria-hidden", "true");
+    const area = createElement("span", "sitter-area", sitter.area);
+    const name = createElement("h2", "", sitter.name);
+    const specialty = createElement("p", "sitter-specialty", sitter.specialty);
+    const availability = createElement("p", "sitter-availability", sitter.availability);
+    const rate = createElement("p", "sitter-rate", "$" + sitter.rate + " ");
+    rate.append(createElement("span", "", "per visit (sample)"));
+    const requestButton = createElement("button", "button sitter-button", sitterRequests[sitter.id] ? "Cancel demo request" : "Request a visit");
+    requestButton.type = "button";
+    requestButton.setAttribute("aria-pressed", sitterRequests[sitter.id] ? "true" : "false");
+    requestButton.addEventListener("click", function () {
+      if (sitterRequests[sitter.id]) {
+        delete sitterRequests[sitter.id];
+      } else {
+        sitterRequests[sitter.id] = true;
+      }
+      storage.set("sproutSitterRequests", sitterRequests);
+      renderSitters();
+    });
+    card.append(avatar, area, name, specialty, availability, rate, requestButton);
     return card;
   }
 
-  function toggleSaved(id) {
-    if (savedIds.indexOf(id) === -1) {
-      savedIds.push(id);
-    } else {
-      savedIds = savedIds.filter(function (savedId) { return savedId !== id; });
-    }
-    storage.set("savedIds", savedIds);
-    renderListings();
+  function renderSitters() {
+    const list = document.getElementById("sitter-list");
+    list.replaceChildren.apply(list, SITTERS.map(makeSitterCard));
   }
 
-  function renderListings() {
-    const query = searchBox.value.trim().toLowerCase();
-    const matches = LISTINGS.filter(function (item) {
-      const text = (item.name + " " + item.category + " " + item.description).toLowerCase();
-      return text.indexOf(query) !== -1;
+  document.getElementById("plant-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const nameInput = document.getElementById("plant-name");
+    const intervalInput = document.getElementById("plant-interval");
+    plants.push({
+      id: "plant-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      name: nameInput.value.trim(),
+      interval: Number(intervalInput.value),
+      lastWatered: dateOffset(0)
     });
+    savePlants();
+    nameInput.value = "";
+    nameInput.focus();
+  });
 
-    grid.replaceChildren.apply(grid, matches.map(makeCard));
-    emptyMessage.hidden = matches.length > 0;
-    savedCount.textContent = savedIds.length === 0
-      ? "Tap Save on anything you like."
-      : "You've saved " + savedIds.length + " item(s) on this device.";
-  }
-
-  searchBox.addEventListener("input", renderListings);
-
-  // ----------------------------------------------------------
-  // 5. Start up.
-  // ----------------------------------------------------------
-  renderListings();
+  renderPlants();
+  renderDashboard();
+  renderSitters();
   showView();
 })();

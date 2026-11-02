@@ -1,5 +1,13 @@
 # Business case
 
+## Initial recommendation for Sprout
+
+Keep the basic plant list and watering schedule free, and do not rely on advertising as the first revenue source. Ads need substantial traffic, interrupt a utility people use briefly, and can weaken trust in care recommendations. If owners and sitters show real demand, test a transparent fee on completed plant-sitting bookings. A paid care-history or extra-reminder tier could be explored later, but only after learning which features customers value.
+
+The sitter idea creates a two-sided marketplace: plant owners need reliable short-term care, and sitters want nearby paid work. Launch in one small community, recruit and vet a starter group of sitters first, and make availability clear so early users do not encounter an empty marketplace. More reliable local sitters can attract owners, while more bookings can attract sitters. This is a potential network effect, not a guarantee of growth.
+
+This prototype only demonstrates fictional sitter profiles and a local pretend request. A real service would need secure accounts and payments, identity/reference checks, reviews and dispute handling, cancellation rules, careful location privacy, and liability planning. These trust and operating costs are the main risks of the marketplace model; the code and sample profiles are not a lasting competitive advantage.
+
 Your prototype shows *what* the product looks like. This document explains *why* it could become a business. Answer in your own words and refer to course concepts by name. See the term project brief on Moodle for length and grading.
 
 ## 1. The idea

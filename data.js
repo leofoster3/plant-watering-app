@@ -1,26 +1,17 @@
-// ============================================================
-// data.js — ALL the fake data for your prototype lives here.
-//
-// There is no database. Everything below is made up, and that is
-// on purpose: never put real people's names, emails, phone numbers
-// or addresses in this file.
-//
-// To change what appears on the Explore page, edit LISTINGS.
-// Each item is one card. Keep the same fields (id, name, category,
-// description) or ask Copilot to add new ones everywhere they're needed.
-// ============================================================
-
 const STARTUP = {
-  name: "YourStartup",
-  tagline: "One sentence that says what your startup does.",
-  pitch: "Who is your customer, what problem do they have, and why is your solution better than what they use today?"
+  name: "Sprout",
+  tagline: "Plant care, on a schedule.",
+  pitch: "Know what needs watering, keep your plant collection up to date, and find a helping hand when you travel."
 };
 
-const LISTINGS = [
-  { id: 1, name: "Sample listing A", category: "Category 1", description: "A short description of this item." },
-  { id: 2, name: "Sample listing B", category: "Category 2", description: "A short description of this item." },
-  { id: 3, name: "Sample listing C", category: "Category 1", description: "A short description of this item." },
-  { id: 4, name: "Sample listing D", category: "Category 3", description: "A short description of this item." },
-  { id: 5, name: "Sample listing E", category: "Category 2", description: "A short description of this item." },
-  { id: 6, name: "Sample listing F", category: "Category 3", description: "A short description of this item." }
+const STARTER_PLANTS = [
+  { id: "plant-1", name: "Monstera", interval: 7, daysSinceWatered: 8 },
+  { id: "plant-2", name: "Snake plant", interval: 14, daysSinceWatered: 4 },
+  { id: "plant-3", name: "Peace lily", interval: 5, daysSinceWatered: 5 }
+];
+
+const SITTERS = [
+  { id: "sitter-1", name: "Maya", area: "Near campus", rate: 12, specialty: "Tropical plants and leafy collections", availability: "Weekdays and weekends" },
+  { id: "sitter-2", name: "Jordan", area: "Town centre", rate: 10, specialty: "Low-light plants and succulents", availability: "Most weekends" },
+  { id: "sitter-3", name: "Sam", area: "North end", rate: 15, specialty: "Watering visits and plant check-ins", availability: "Flexible schedule" }
 ];

@@ -3,81 +3,142 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YourStartup</title>
-  <meta name="description" content="A student startup prototype for BSAD 281.">
+  <title>Sprout - plant care, on schedule</title>
+  <meta name="description" content="A simple plant-watering tracker and fictional plant-sitter directory.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- =========================================================
-       HEADER: logo text + navigation.
-       Each link points to a "view" further down the page (#home, #explore, #about).
-       ========================================================= -->
   <header class="site-header">
-    <a class="brand" href="#home" id="brand-name">YourStartup</a>
+    <a class="brand" href="#home" id="brand-name">Sprout</a>
     <nav aria-label="Main">
-      <a href="#home">Home</a>
-      <a href="#explore">Explore</a>
-      <a href="#about">About</a>
+      <a href="#home">Today</a>
+      <a href="#plants">My plants</a>
+      <a href="#sitters">Plant sitters</a>
+      <a href="#about">Our idea</a>
     </nav>
   </header>
 
   <main>
 
-    <!-- =======================================================
-         VIEW 1: HOME — what you do, for whom, and why it matters.
-         ======================================================= -->
     <section id="home" data-view>
       <div class="hero">
-        <p class="eyebrow">Prototype</p>
-        <h1 id="tagline">One sentence that says what your startup does.</h1>
-        <p class="lead" id="pitch">
-          Who is your customer, what problem do they have, and why is your
-          solution better than what they use today?
-        </p>
-        <a class="button" href="#explore">See it in action</a>
+        <p class="eyebrow">A little care goes a long way</p>
+        <h1 id="tagline">Plant care, on a schedule.</h1>
+        <p class="lead" id="pitch">Know what needs watering, keep your plant collection up to date, and find a helping hand when you travel.</p>
+        <a class="button" href="#plants">Manage my plants</a>
       </div>
 
-      <div class="steps">
-        <div class="card">
-          <h2>1. Step one</h2>
-          <p>Describe the first thing a customer does.</p>
+      <div class="stats" aria-label="Plant care summary">
+        <article class="stat">
+          <span class="stat-label">In your collection</span>
+          <strong id="plant-count">0</strong>
+          <span>plants</span>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Need water</span>
+          <strong id="due-count">0</strong>
+          <span>today or overdue</span>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Watered today</span>
+          <strong id="watered-count">0</strong>
+          <span>plants</span>
+        </article>
+      </div>
+
+      <section class="dashboard-section" aria-labelledby="today-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Your garden</p>
+            <h2 id="today-heading">Up next</h2>
+          </div>
+          <a class="text-link" href="#plants">View all plants</a>
         </div>
-        <div class="card">
-          <h2>2. Step two</h2>
-          <p>Describe what happens next.</p>
+        <ul class="care-list" id="today-list"></ul>
+        <p class="empty" id="today-empty" hidden>No plants yet. Add your first one to get started.</p>
+      </section>
+
+      <aside class="travel-note">
+        <span class="note-mark" aria-hidden="true">✳</span>
+        <div>
+          <h2>Heading away?</h2>
+          <p>Browse fictional local plant sitters in this prototype.</p>
         </div>
-        <div class="card">
-          <h2>3. Step three</h2>
-          <p>Describe the result the customer gets.</p>
+        <a class="text-link" href="#sitters">Meet the sitters</a>
+      </aside>
+    </section>
+
+    <section id="plants" data-view hidden>
+      <div class="section-heading page-heading">
+        <div>
+          <p class="eyebrow">Your collection</p>
+          <h1>My plants</h1>
+          <p class="muted">Add a plant, set how often it likes a drink, and check it off when watered.</p>
         </div>
       </div>
+
+      <form class="add-form" id="plant-form">
+        <label>
+          <span>Plant name</span>
+          <input id="plant-name" name="name" type="text" placeholder="e.g. Monstera" maxlength="48" required>
+        </label>
+        <label>
+          <span>Water every</span>
+          <select id="plant-interval" name="interval" required>
+            <option value="3">3 days</option>
+            <option value="5">5 days</option>
+            <option value="7" selected>7 days</option>
+            <option value="10">10 days</option>
+            <option value="14">14 days</option>
+            <option value="21">21 days</option>
+          </select>
+        </label>
+        <button class="button" type="submit">Add plant</button>
+      </form>
+
+      <div class="plant-list" id="plant-list"></div>
+      <p class="empty" id="plants-empty" hidden>Your collection is empty. Add a plant above whenever you're ready.</p>
     </section>
 
-    <!-- =======================================================
-         VIEW 2: EXPLORE — a list built from the fake data in data.js.
-         ======================================================= -->
-    <section id="explore" data-view hidden>
-      <h1>Explore</h1>
-      <p class="muted">These examples are fake. They come from <code>data.js</code>.</p>
-
-      <label class="search">
-        <span>Search</span>
-        <input type="search" id="search-box" placeholder="Type to filter…">
-      </label>
-
-      <p class="muted" id="saved-count"></p>
-      <div class="grid" id="listing-grid"></div>
-      <p class="empty" id="empty-message" hidden>Nothing matches your search.</p>
+    <section id="sitters" data-view hidden>
+      <div class="section-heading page-heading">
+        <div>
+          <p class="eyebrow">Care while you're away</p>
+          <h1>Find a plant sitter</h1>
+          <p class="muted">Browse sample sitter profiles and try a pretend request. No one will be contacted.</p>
+        </div>
+      </div>
+      <div class="sitter-grid" id="sitter-list"></div>
+      <p class="prototype-note">All sitter profiles and prices are fictional examples. Booking requests are not sent or paid.</p>
     </section>
 
-    <!-- =======================================================
-         VIEW 3: ABOUT — your team and your story.
-         ======================================================= -->
     <section id="about" data-view hidden>
-      <h1>About us</h1>
-      <p>Tell the story of why your team started this company.</p>
-      <p>Use first names only, or no names at all — this site is public.</p>
+      <div class="section-heading page-heading">
+        <div>
+          <p class="eyebrow">The business idea</p>
+          <h1>Better plant care, with a helping hand.</h1>
+          <p class="lead">Sprout helps plant owners remember routine care and find temporary help when life takes them away from home.</p>
+        </div>
+      </div>
+      <div class="idea-grid">
+        <article class="idea-block">
+          <span class="idea-number">01</span>
+          <h2>Keep care free</h2>
+          <p>Watering reminders and a simple plant list are the habit-forming core. Ads are a poor first fit: they interrupt a calm tool, need lots of traffic to earn much, and can make care advice feel less trustworthy.</p>
+        </article>
+        <article class="idea-block">
+          <span class="idea-number">02</span>
+          <h2>Earn when a sitter is booked</h2>
+          <p>A future marketplace could charge a transparent service fee on completed bookings. Owners get convenient help; sitters get local customers. Start in one community and recruit sitters before promising broad availability.</p>
+        </article>
+        <article class="idea-block">
+          <span class="idea-number">03</span>
+          <h2>Build trust before scale</h2>
+          <p>Real bookings would require identity and reference checks, secure payments, clear cancellation terms, privacy-conscious location sharing, and a plan for damaged plants or missed visits. A paid care-history upgrade could come later if users ask for it.</p>
+        </article>
+      </div>
+      <p class="prototype-note">Student prototype: plant data stays in this browser. Profiles, prices, requests, and business ideas are fictional; there are no real accounts, reminders, or payments.</p>
     </section>
 
   </main>
